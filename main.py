@@ -12,8 +12,12 @@ from pathlib import Path
 
 def convert_word_to_png(docx_path, output_dir, dpi=150, progress_callback=None, value_callback=None, cancel_event=None):
     """Word 문서를 페이지별 PNG 이미지로 변환합니다."""
-    from docx2pdf import convert
+    import pythoncom
+    import win32com.client
     import fitz  # PyMuPDF
+
+    # 별도 스레드에서 COM 사용 시 반드시 필요
+    pythoncom.CoInitialize()
 
     docx_path = Path(docx_path)
     output_dir = Path(output_dir)
@@ -31,7 +35,14 @@ def convert_word_to_png(docx_path, output_dir, dpi=150, progress_callback=None, 
         if value_callback:
             value_callback(0)
 
-        convert(str(safe_docx), str(pdf_path))
+        word = win32com.client.Dispatch("Word.Application")
+        word.Visible = False
+        try:
+            doc = word.Documents.Open(str(safe_docx.resolve()))
+            doc.SaveAs(str(pdf_path.resolve()), FileFormat=17)  # 17 = wdFormatPDF
+            doc.Close(False)
+        finally:
+            word.Quit()
 
         if value_callback:
             value_callback(40)
