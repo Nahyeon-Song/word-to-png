@@ -18,8 +18,14 @@ echo [2/3] EXE 빌드 중 (시간이 걸릴 수 있습니다)...
 pyinstaller ^
     --onefile ^
     --windowed ^
-    --name "Word_to_PNG" ^
+    --name "word_to_image" ^
     --icon NONE ^
+    --hidden-import=win32com ^
+    --hidden-import=win32com.client ^
+    --hidden-import=win32com.server ^
+    --hidden-import=win32timezone ^
+    --hidden-import=pythoncom ^
+    --hidden-import=pywintypes ^
     main.py
 
 if %errorlevel% neq 0 (
